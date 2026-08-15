@@ -67,6 +67,8 @@ func (d *decoder) readNextItem() (any, error) {
 		return d.readInt()
 	case 'l':
 		return d.readList()
+	case 'd':
+		return d.readDictionary()
 	default:
 		// default is a string type
 		err = d.UnreadByte()
@@ -103,4 +105,36 @@ func (d *decoder) readList() ([]any, error) {
 	}
 
 	return list, nil
+}
+
+func (d *decoder) readDictionary() (map[string]any, error) {
+	// we need to read the next value until next byte is 'e'
+	dictionary := make(map[string]any)
+	for {
+		v, err := d.ReadByte()
+		if err != nil {
+			return nil, err
+		}
+		if v == 'e' {
+			break
+		}
+		err = d.UnreadByte()
+		if err != nil {
+			return nil, err
+		}
+
+		key, err := d.readString()
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := d.readNextItem()
+		if err != nil {
+			return nil, err
+		}
+
+		dictionary[key] = value
+	}
+
+	return dictionary, nil
 }

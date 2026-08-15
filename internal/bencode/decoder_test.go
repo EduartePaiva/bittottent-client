@@ -54,3 +54,35 @@ func TestDecodeList(t *testing.T) {
 		})
 	}
 }
+
+func TestDecodeDictionary(t *testing.T) {
+	tests := []struct {
+		name     string
+		sample   []byte
+		expected any
+	}{
+		{"empty dictionary", []byte("de"), make(map[string]any)},
+		{"key value of strings", []byte("d3:cow3:moo4:spam4:eggse"), map[string]any{"cow": "moo", "spam": "eggs"}},
+		{"key value of list", []byte("d4:spaml1:a1:bee"), map[string]any{"spam": []any{"a", "b"}}},
+		{
+			"big key values of string",
+			[]byte("d9:publisher3:bob17:publisher-webpage15:www.example.com18:publisher.location4:homee"),
+			map[string]any{
+				"publisher":          "bob",
+				"publisher-webpage":  "www.example.com",
+				"publisher.location": "home",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			decoder := decoder{*bufio.NewReader(bytes.NewReader(tt.sample[1:]))}
+
+			list, err := decoder.readDictionary()
+			t.Log(list)
+			assert.Nil(t, err)
+			assert.Equal(t, tt.expected, list)
+		})
+	}
+}
