@@ -24,7 +24,7 @@ func TestDecodeString(t *testing.T) {
 
 			str, err := decoder.readString()
 			t.Log(str)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, str)
 		})
 	}
@@ -49,7 +49,7 @@ func TestDecodeList(t *testing.T) {
 
 			list, err := decoder.readList()
 			t.Log(list)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, list)
 		})
 	}
@@ -81,7 +81,7 @@ func TestDecodeDictionary(t *testing.T) {
 
 			list, err := decoder.readDictionary()
 			t.Log(list)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, list)
 		})
 	}
