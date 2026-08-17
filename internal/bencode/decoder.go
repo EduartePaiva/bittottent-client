@@ -152,11 +152,11 @@ func (d *decoder) readDictionary() (map[string]any, error) {
 func Decode(reader io.Reader) (map[string]any, error) {
 	d := decoder{Reader: *bufio.NewReader(reader)}
 
-	b, err := d.ReadByte()
+	firstByte, err := d.ReadByte()
 	if err != nil {
 		return nil, err
 	}
-	if b != 'd' {
+	if firstByte != 'd' {
 		return nil, ErrMustBeDictionary
 	}
 

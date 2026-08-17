@@ -1,13 +1,14 @@
 package bencode
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"io"
+	"sort"
 )
 
 type encoder struct {
-	io.Writer
+	bytes.Buffer
 }
 
 var ErrInvalidType = errors.New("error: invalid encoded type")
@@ -32,13 +33,15 @@ func (e *encoder) encodeAnyType(anyType any) error {
 		return e.encodeInt(v)
 	case []any:
 		return e.encodeList(v)
+	case map[string]any:
+		return e.encodeDictionary(v)
 	default:
 		return fmt.Errorf("error: invalid type'%T'", v)
 	}
 }
 
 func (e *encoder) encodeList(list []any) error {
-	_, err := e.Write([]byte("l"))
+	err := e.WriteByte('l')
 	if err != nil {
 		return err
 	}
@@ -50,10 +53,44 @@ func (e *encoder) encodeList(list []any) error {
 		}
 	}
 
-	_, err = e.Write([]byte("e"))
+	err = e.WriteByte('e')
 	return err
 }
 
-func Encode(w io.Writer, value map[string]any) error {
-	return nil
+func (e *encoder) encodeDictionary(dictionary map[string]any) error {
+
+	sortedKeys := make(sort.StringSlice, 0, len(dictionary))
+
+	for key := range dictionary {
+		sortedKeys = append(sortedKeys, key)
+	}
+
+	sortedKeys.Sort()
+
+	err := e.WriteByte('d')
+	if err != nil {
+		return err
+	}
+
+	for _, key := range sortedKeys {
+		err := e.encodeString(key)
+		if err != nil {
+			return err
+		}
+		err = e.encodeAnyType(dictionary[key])
+		if err != nil {
+			return err
+		}
+	}
+
+	err = e.WriteByte('e')
+
+	return err
+}
+
+func Encode(value any) ([]byte, error) {
+	encoder := encoder{}
+	err := encoder.encodeAnyType(value)
+
+	return encoder.Bytes(), err
 }

@@ -1,7 +1,6 @@
 package bencode
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,13 +20,12 @@ func TestEncodeList(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var buf bytes.Buffer
-			encoder := encoder{Writer: &buf}
+			encoder := encoder{}
 
 			err := encoder.encodeList(tt.sample)
 			assert.NoError(t, err)
 
-			assert.Equal(t, tt.expected, buf.String())
+			assert.Equal(t, tt.expected, encoder.String())
 		})
 	}
 }
